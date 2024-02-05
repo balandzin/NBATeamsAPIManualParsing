@@ -8,10 +8,10 @@
 import Foundation
 
 struct Team: Decodable {
-    let abbreviation: String
+    //let abbreviation: String
     let city: String
-    let conference: String
-    let division: String
+    //let conference: String
+    //let division: String
     let fullName: String
     let name: String
 }
