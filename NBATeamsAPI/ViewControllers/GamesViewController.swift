@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Alamofire
 
 final class GamesViewController: UITableViewController {
     
@@ -17,7 +18,7 @@ final class GamesViewController: UITableViewController {
     private var games: Games!
     private var gameData: [Game] = []
     private let networkManager = NetworkManager.shared
-    private let url = URL(string: "https://www.balldontlie.io/api/v1/games")
+    private let url = "https://www.balldontlie.io/api/v1/games"
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -52,17 +53,7 @@ final class GamesViewController: UITableViewController {
 extension GamesViewController {
     
     private func fetchGames() {
-        networkManager.fetch(Games.self, from: url!) { [weak self] result in
-            guard let self else { return }
-            switch result {
-            case .success(let games):
-                self.games = games
-                gameData = games.data
-                tableView.reloadData()
-            case .failure(let error):
-                print(error)
-            }
-        }
+        AF.request(url).responseJSON(completionHandler: <#T##(AFDataResponse<Any>) -> Void#>)
     }
 }
 
