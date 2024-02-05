@@ -82,5 +82,7 @@ extension GamesViewController {
         
         return activityIndicator
     }
-    
 }
+
+
+// Проверка ветки master
