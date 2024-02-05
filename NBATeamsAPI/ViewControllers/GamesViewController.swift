@@ -6,13 +6,12 @@
 //
 
 import UIKit
-import Alamofire
 
 final class GamesViewController: UITableViewController {
     
     /*
-    API (сведения об играх команд NBA)
-    находится по адресу https://www.balldontlie.io/home.html#introduction
+     API (сведения об играх команд NBA)
+     находится по адресу https://www.balldontlie.io/home.html#introduction
      */
     
     private var games: Games!
@@ -23,10 +22,11 @@ final class GamesViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.rowHeight = 100
+        //showSpinner(in: view)
         fetchGames()
     }
     
-// MARK: - Table view data source
+    // MARK: - Table view data source
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         gameData.count
     }
@@ -51,47 +51,36 @@ final class GamesViewController: UITableViewController {
 
 // MARK: - Networking
 extension GamesViewController {
-    
     private func fetchGames() {
-        AF.request(url)
-            .validate()
-            .responseJSON { [unowned self] dataResponse in
-                switch dataResponse.result {
-                case .success(let value):
-                    
-                    guard let gameDetails = value as? [String: Any] else { return }
-                    
-                    guard let games = gameDetails["data"] as? [[String: Any]] else { return }
-                    
-                    for game in games {
-                        
-                        guard let homeTeam = game["home_team"] as? [String: Any] else { return }
-                        guard let visitorTeam = game["visitor_team"] as? [String: Any] else { return }
-                        
-                        let game = Game(
-                            date: game["date"] as? String ?? "",
-                            season: game["season"] as? Int ?? 0,
-                            homeTeam: Team(
-                                city: homeTeam["city"] as?  String ?? "",
-                                fullName: homeTeam["full_name"] as? String ?? "",
-                                name: homeTeam["name"] as? String ?? ""
-                                ),
-                            homeTeamScore: game["home_team_score"] as? Int ?? 0,
-                            visitorTeam: Team(
-                                city: visitorTeam["city"] as? String ?? "",
-                                fullName: visitorTeam["full_name"] as? String ?? "",
-                                name: visitorTeam["name"] as? String ?? ""
-                                ),
-                            visitorTeamScore: game["visitor_team_score"] as? Int ?? 0
-                            )
-                        gameData.append(game)
-                    }
-                    
-                    print(games)
-                    tableView.reloadData()
-                case .failure(let error):
-                    print(error)
-                }
+        networkManager.fetchGames(from: url) { [unowned self] result in
+            switch result {
+            case .success(let games):
+                self.gameData = games
+                self.tableView.reloadData()
+            case .failure(let error):
+                showAlert(with: "Error", and: error.localizedDescription)
             }
+        }
     }
+    
+    private func showAlert(with title: String, and message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "OK", style: .default)
+        alert.addAction(okAction)
+        present(alert, animated: true)
+        
+    }
+    
+    private func showSpinner(in view: UIView) -> UIActivityIndicatorView {
+        let activityIndicator = UIActivityIndicatorView(style: .large)
+        activityIndicator.color = .gray
+        activityIndicator.startAnimating()
+        activityIndicator.center = view.center
+        activityIndicator.hidesWhenStopped = true
+        
+        view.addSubview(activityIndicator)
+        
+        return activityIndicator
+    }
+    
 }
